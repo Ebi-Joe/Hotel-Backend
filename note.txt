@@ -1,0 +1,95 @@
+{
+    "email":"ebijoe911@gmail.com",
+    "password":"ebijoe911"
+}
+http://localhost:3000/api/login\
+
+lhPqQrF1JtvmClE9
+
+{
+    "firstName": "Josiah",
+    "lastName": "Esuku",
+    "email": "ikwuegbustephanie56@gmail.com",
+    "password": "ebijoe911",
+    "confirmPassword": "ebijoe911",
+    "role": "Guest"
+}
+{
+    "firstName": "Jemimah",
+    "lastName": "Esuku",
+    "phone": "09012437740",
+    "email": "esukujemimah2006@gmail.com",
+    "currency": "USD",
+    "roomType": "6731f9ca46118596de4cfc87", 
+    "roomName": "Junior Suite",
+    "rooms": "2",
+    "CheckInDate": "2024-12-15",
+    "CheckOutDate": "2024-12-19",
+    "totalDays": 4,
+    "amount": 700
+}
+{
+    "name":"Fred",
+    "point":"Good Time",
+    "description":"That Is why me and my family keeps on coming here 100% comfortability,…",
+    "rating":4.5,
+    "date":"April, 2019"
+}
+exports.resetPassword = async (req, res) => {
+    const { token } = req.params;
+    const { newPassword, confirmPassword } = req.body;
+
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    try {
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const user = await User.findById(decoded.id);
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid token" });
+        }
+
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        return res.status(200).json({ message: "Password has been reset successfully!" });
+    } catch (error) {
+        console.error("Error in resetPassword:", error.message);
+        return res.status(500).json({ message: "Server error, something went wrong!" });
+    }
+};
+
+exports.bookRoom = async (req, res) => {
+    const { roomId } = req.body; // Room ID from the booking request
+
+    try {
+        // Find the room by ID
+        const room = await Room.findById(roomId);
+
+        if (!room) {
+            return res.status(404).json({ message: "Room not found" });
+        }
+
+        // Check if the room is already booked
+        if (!room.isAvailable) {
+            return res.status(400).json({ message: "Room is already booked" });
+        }
+
+        // Update the room's availability to false
+        room.isAvailable = false;
+
+        // Save the updated room
+        await room.save();
+
+        return res.status(200).json({ message: "Room booked successfully", room });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
