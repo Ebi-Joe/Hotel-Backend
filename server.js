@@ -43,7 +43,7 @@ cron.schedule('0 12 * * *', async () => {
 });
 
 app.use(cors({
-    origin: ["http://localhost:5173", ""],
+    origin: ["http://localhost:5173", "https://hotel-frontend-ivory.vercel.app"],
     allowedHeaders: ["Content-Type", "Authorization", "auth-token"],
     methods: [ "GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
