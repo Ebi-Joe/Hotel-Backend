@@ -195,7 +195,7 @@ exports.login = async (req, res) => {
 
         if (!user.isverified) {
             const verificationToken = user.generateVerifyToken();
-            const verifyUrl = `${process.env.FRONTEND_URL}/api/reVerify/${verificationToken}`;
+            const verifyUrl = `${process.env.FRONTEND_URL}/api/verify/${verificationToken}`;
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: user.email,
