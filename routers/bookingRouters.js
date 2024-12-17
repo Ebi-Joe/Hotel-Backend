@@ -5,6 +5,6 @@ const router = express.Router()
 
 router.post("/api/booking", auth, bookingControllers.newBooking)
 router.post("/api/payment/verify", auth, bookingControllers.verifyPayments)
-router.get("/api/getAll-Bookings", auth, admin, bookingControllers.getAllBookings)
+router.get("/api/getAll-Bookings", admin, bookingControllers.getAllBookings)
 
 module.exports = router
