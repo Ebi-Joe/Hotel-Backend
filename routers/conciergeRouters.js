@@ -7,9 +7,9 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const uploads = multer({ storage:storage });
 
-router.post("/api/newConcierge", auth, uploads.array("img", 1), conciergeControllers.newConcierge)
+router.post("/api/newConcierge", auth, admin, uploads.array("img", 1), conciergeControllers.newConcierge)
 router.get("/api/getOne-concierge", conciergeControllers.getOneConcierge)
-router.get("/api/getAll-concierges", admin, conciergeControllers.getAllConcierge)
+router.get("/api/getAll-concierges", auth, admin, conciergeControllers.getAllConcierge)
 router.delete("/api/deleteOne-concierge", conciergeControllers.deleteOneConcierge)
 router.patch("/api/updateOne-concierge", conciergeControllers.updateOneConcierge)
 
