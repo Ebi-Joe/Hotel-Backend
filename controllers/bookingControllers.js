@@ -23,7 +23,7 @@ exports.newBooking = async (req, res) => {
             tx_ref: bookingId,
             amount,
             currency,
-            redirect_url: 'http://localhost:5173/login',
+            redirect_url: 'https://hotel-frontend-ivory.vercel.app/thankYou',
             customer: {
                 email,
                 name: firstName,
@@ -156,7 +156,7 @@ exports.getAllBookings = async (req, res) => {
     try {
         const allBookings = await Booking.find()
           // Map over bookings to format createdAt
-          const formattedBookings = allBookings.map((booking) => {
+        const formattedBookings = allBookings.map((booking) => {
             const createdAt = booking.createdAt ? new Date(booking.createdAt) : null;
             const checkInDate = booking.CheckInDate ? new Date(booking.CheckInDate) : null;
             const checkOutDate = booking.CheckOutDate ? new Date(booking.CheckOutDate) : null;
