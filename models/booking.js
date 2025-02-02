@@ -8,7 +8,7 @@ const bookingSchema = new mongoose.Schema ({
     email: { type: String, unique: true },
     roomType: { type: mongoose.Schema.Types.ObjectId, ref: "RoomType", required: true },
     roomName: { type: String },
-    rooms: { type: Number },
+    rooms: { type: String },
     CheckInDate: { type: Date },
     CheckInTime: { type: String, default: "02:00 pm" },
     CheckOutDate: { type: Date },
