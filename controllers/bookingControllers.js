@@ -83,6 +83,7 @@ exports.verifyPayments = async (req, res) => {
         if (response.ok) {
             const booking = new Booking({
                 bookingId,
+                transaction_id,
                 firstName: data.data.meta.firstName,
                 lastName: data.data.meta.lastName,
                 phone: data.data.meta.phone,
