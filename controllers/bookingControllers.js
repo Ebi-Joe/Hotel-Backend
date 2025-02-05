@@ -99,16 +99,19 @@ exports.verifyPayments = async (req, res) => {
 
             await booking.save()
 
-            // Find the available rooms to mark as sold out
             const roomsToUpdate = await Room.find({
                 roomType: data.data.meta.roomType,
                 isAvailable: true
-            }).limit(data.data.meta.rooms);
-
+            }).limit(data.data.meta.rooms); // This should limit to the number of rooms requested
+            
+            if (roomsToUpdate.length < data.data.meta.rooms) {
+                return res.status(400).json({ message: "Not enough rooms available to book" });
+            }
+            
             // Update the rooms individually
-            for (const room of roomsToUpdate) {
-                room.isAvailable = false;
-                await room.save();
+            for (let i = 0; i < data.data.meta.rooms; i++) {
+                roomsToUpdate[i].isAvailable = false;
+                await roomsToUpdate[i].save();
             }
 
             // Send confirmation email
