@@ -11,7 +11,7 @@ const FLW_SECRET_KEY = process.env.FLW_SECRET_KEY;
 exports.newBooking = async (req, res) => {
     const { firstName, lastName, phone, email, currency, roomType, roomName, rooms, CheckInDate, CheckOutDate, amount, totalDays } = req.body;
 
-    const availableRooms = await Room.find({ roomType, isAvailable: true }).limit(rooms);
+    const availableRooms = await Room.find({ roomType, isAvailable: true });
 
     if (availableRooms.length < rooms) {
         return res.status(400).json({ message: "Not enough rooms available" });
