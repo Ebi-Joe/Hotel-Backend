@@ -99,9 +99,6 @@ exports.verifyPayments = async (req, res) => {
                 return res.status(400).json({ message: "Not enough rooms available" });
             }
 
-            // Assign the exact number of rooms needed
-            const bookedRoomIds = availableRooms.map(room => room._id);
-
             // Create the booking
             const booking = new Booking({
                 bookingId,
@@ -111,7 +108,7 @@ exports.verifyPayments = async (req, res) => {
                 email: data.data.meta.email,
                 roomType: data.data.meta.roomType,
                 roomName: data.data.meta.roomName,
-                rooms: bookedRoomIds, // Store room IDs instead of just the count
+                rooms: data.data.meta.rooms, // Store room IDs instead of just the count
                 CheckInDate: data.data.meta.CheckInDate,
                 CheckOutDate: data.data.meta.CheckOutDate,
                 totalDays: data.data.meta.totalDays,
@@ -121,11 +118,16 @@ exports.verifyPayments = async (req, res) => {
 
             await booking.save();
 
+            const roomsToUpdate = await Room.find({
+                roomType: data.data.meta.roomType,
+                isAvailable: true
+            }).limit(data.data.meta.rooms); // This should limit to the number of rooms requested
+
             // Mark the booked rooms as unavailable
-            await Room.updateMany(
-                { _id: { $in: bookedRoomIds } },
-                { $set: { isAvailable: false } }
-            );
+            for (let i = 0; i < data.data.meta.rooms; i++) {
+                roomsToUpdate[i].isAvailable = false;
+                await roomsToUpdate[i].save();
+            }
 
             // Send confirmation email
             const mailOptions = {
