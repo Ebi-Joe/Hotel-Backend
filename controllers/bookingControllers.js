@@ -71,16 +71,38 @@ exports.newBooking = async (req, res) => {
 
 exports.verifyPayments = async (req, res) => {
     const { bookingId, transaction_id } = req.body;
+
     try {
         const response = await fetch(`https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${FLW_SECRET_KEY}`,
             }
-        })
+        });
+
         const data = await response.json();
 
-        if (response.ok) {
+        if (response.ok && data.status === "success") {
+            // Prevent duplicate bookings for the same transaction
+            const existingBooking = await Booking.findOne({ bookingId });
+            if (existingBooking) {
+                return res.status(400).json({ message: "Booking already confirmed!" });
+            }
+
+            // Find available rooms for the requested type
+            const availableRooms = await Room.find({
+                roomType: data.data.meta.roomType,
+                isAvailable: true
+            }).limit(data.data.meta.rooms);
+
+            if (availableRooms.length < data.data.meta.rooms) {
+                return res.status(400).json({ message: "Not enough rooms available" });
+            }
+
+            // Assign the exact number of rooms needed
+            const bookedRoomIds = availableRooms.map(room => room._id);
+
+            // Create the booking
             const booking = new Booking({
                 bookingId,
                 firstName: data.data.meta.firstName,
@@ -89,30 +111,21 @@ exports.verifyPayments = async (req, res) => {
                 email: data.data.meta.email,
                 roomType: data.data.meta.roomType,
                 roomName: data.data.meta.roomName,
-                rooms: data.data.meta.rooms,
+                rooms: bookedRoomIds, // Store room IDs instead of just the count
                 CheckInDate: data.data.meta.CheckInDate,
                 CheckOutDate: data.data.meta.CheckOutDate,
                 totalDays: data.data.meta.totalDays,
                 amount: data.data.amount,
                 status: "complete"
-            })
+            });
 
-            await booking.save()
+            await booking.save();
 
-            const roomsToUpdate = await Room.find({
-                roomType: data.data.meta.roomType,
-                isAvailable: true
-            }).limit(data.data.meta.rooms); // This should limit to the number of rooms requested
-            
-            if (roomsToUpdate.length < data.data.meta.rooms) {
-                return res.status(400).json({ message: "Not enough rooms available to book" });
-            }
-            
-            // Update the rooms individually
-            for (let i = 0; i < data.data.meta.rooms; i++) {
-                roomsToUpdate[i].isAvailable = false;
-                await roomsToUpdate[i].save();
-            }
+            // Mark the booked rooms as unavailable
+            await Room.updateMany(
+                { _id: { $in: bookedRoomIds } },
+                { $set: { isAvailable: false } }
+            );
 
             // Send confirmation email
             const mailOptions = {
@@ -142,18 +155,21 @@ exports.verifyPayments = async (req, res) => {
                 `
             };
 
-            await transporter.sendMail(mailOptions)
+            await transporter.sendMail(mailOptions);
 
-            console.log(booking)
-            res.json({ message: "Payment Confirmed and Email Sent", booking })
+            console.log(booking);
+            res.json({ message: "Payment Confirmed and Email Sent", booking });
+
         } else {
-            res.json({ message: "Payment Failed!!..." })
+            res.json({ message: "Payment Failed!!..." });
         }
+
     } catch (error) {
-        console.log({ message: error.message })
+        console.error("Error verifying payment:", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
+
 
 exports.getAllBookings = async (req, res) => {
     try {
