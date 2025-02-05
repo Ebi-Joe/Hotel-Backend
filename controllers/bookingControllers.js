@@ -89,17 +89,17 @@ exports.verifyPayments = async (req, res) => {
                 return res.status(400).json({ message: "Booking already confirmed!" });
             }
 
-            // Find available rooms for the requested type
+            // Find available rooms based on the requested room type and availability
             const availableRooms = await Room.find({
                 roomType: data.data.meta.roomType,
                 isAvailable: true
-            }).limit(data.data.meta.rooms);
+            }).limit(data.data.meta.rooms); // Limit by the number of rooms requested
 
             if (availableRooms.length < data.data.meta.rooms) {
                 return res.status(400).json({ message: "Not enough rooms available" });
             }
 
-            // Create the booking
+            // Create the booking document
             const booking = new Booking({
                 bookingId,
                 firstName: data.data.meta.firstName,
@@ -108,7 +108,7 @@ exports.verifyPayments = async (req, res) => {
                 email: data.data.meta.email,
                 roomType: data.data.meta.roomType,
                 roomName: data.data.meta.roomName,
-                rooms: data.data.meta.rooms, // Store room IDs instead of just the count
+                rooms: data.data.meta.rooms,  // We store the number of rooms, not the room IDs
                 CheckInDate: data.data.meta.CheckInDate,
                 CheckOutDate: data.data.meta.CheckOutDate,
                 totalDays: data.data.meta.totalDays,
@@ -116,17 +116,14 @@ exports.verifyPayments = async (req, res) => {
                 status: "complete"
             });
 
+            // Save the booking document to the database
             await booking.save();
 
-            const roomsToUpdate = await Room.find({
-                roomType: data.data.meta.roomType,
-                isAvailable: true
-            }).limit(data.data.meta.rooms); // This should limit to the number of rooms requested
-
-            // Mark the booked rooms as unavailable
+            // Mark the booked rooms as unavailable (after booking)
             for (let i = 0; i < data.data.meta.rooms; i++) {
-                roomsToUpdate[i].isAvailable = false;
-                await roomsToUpdate[i].save();
+                const room = availableRooms[i];
+                room.isAvailable = false;  // Mark each room as unavailable
+                await room.save();  // Save the updated room
             }
 
             // Send confirmation email
@@ -157,6 +154,7 @@ exports.verifyPayments = async (req, res) => {
                 `
             };
 
+            // Send the confirmation email
             await transporter.sendMail(mailOptions);
 
             console.log(booking);
