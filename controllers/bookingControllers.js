@@ -72,6 +72,12 @@ exports.newBooking = async (req, res) => {
 exports.verifyPayments = async (req, res) => {
     const { bookingId, transaction_id } = req.body;
     try {
+        const existingBooking = await Booking.findOne({ transaction_id });
+
+        if (existingBooking) {
+            return res.status(400).json({ message: "Booking already exists for this transaction.", booking: existingBooking });
+        }
+        
         const response = await fetch(`https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`, {
             method: "GET",
             headers: {
