@@ -15,7 +15,7 @@ const bookingSchema = new mongoose.Schema ({
     CheckOutTime: { type: String, default: "12:00 pm" },
     totalDays: { type: Number },
     amount: { type: Number, required: true },
-    transaction_id: { type: String },
+    transactionId: { type: String },
     status: { type: String, default: "Pending" },
 
 }, {timestamps: true})
