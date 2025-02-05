@@ -1,3 +1,4 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema ({
@@ -5,7 +6,7 @@ const bookingSchema = new mongoose.Schema ({
     lastName: { type: String },
     phone: { type: String },
     currency: { type: String },
-    email: { type: String, unique: true },
+    email: { type: String, required: true },
     roomType: { type: mongoose.Schema.Types.ObjectId, ref: "RoomType", required: true },
     roomName: { type: String },
     rooms: { type: String },
