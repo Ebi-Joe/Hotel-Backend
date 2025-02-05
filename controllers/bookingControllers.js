@@ -156,7 +156,7 @@ exports.getAllBookings = async (req, res) => {
     try {
         const allBookings = await Booking.find()
           // Map over bookings to format createdAt
-        const formattedBookings = allBookings.map((booking) => {
+          const formattedBookings = allBookings.map((booking) => {
             const createdAt = booking.createdAt ? new Date(booking.createdAt) : null;
             const checkInDate = booking.CheckInDate ? new Date(booking.CheckInDate) : null;
             const checkOutDate = booking.CheckOutDate ? new Date(booking.CheckOutDate) : null;
