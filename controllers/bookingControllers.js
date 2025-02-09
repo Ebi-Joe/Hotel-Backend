@@ -72,12 +72,6 @@ exports.newBooking = async (req, res) => {
 exports.verifyPayments = async (req, res) => {
     const { bookingId, transaction_id } = req.body;
     try {
-        const existingBooking = await Booking.findOne({ transaction_id });
-
-        if (existingBooking) {
-            return res.status(400).json({ message: "Booking already exists for this transaction.", booking: existingBooking });
-        }
-        
         const response = await fetch(`https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`, {
             method: "GET",
             headers: {
@@ -89,7 +83,6 @@ exports.verifyPayments = async (req, res) => {
         if (response.ok) {
             const booking = new Booking({
                 bookingId,
-                transaction_id,
                 firstName: data.data.meta.firstName,
                 lastName: data.data.meta.lastName,
                 phone: data.data.meta.phone,
@@ -163,7 +156,7 @@ exports.getAllBookings = async (req, res) => {
     try {
         const allBookings = await Booking.find()
           // Map over bookings to format createdAt
-          const formattedBookings = allBookings.map((booking) => {
+        const formattedBookings = allBookings.map((booking) => {
             const createdAt = booking.createdAt ? new Date(booking.createdAt) : null;
             const checkInDate = booking.CheckInDate ? new Date(booking.CheckInDate) : null;
             const checkOutDate = booking.CheckOutDate ? new Date(booking.CheckOutDate) : null;
