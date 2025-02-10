@@ -155,11 +155,16 @@ exports.verifyPayments = async (req, res) => {
 exports.getAllBookings = async (req, res) => {
     try {
         const allBookings = await Booking.find()
+        let totalAmount = 0;
           // Map over bookings to format createdAt
         const formattedBookings = allBookings.map((booking) => {
             const createdAt = booking.createdAt ? new Date(booking.createdAt) : null;
             const checkInDate = booking.CheckInDate ? new Date(booking.CheckInDate) : null;
             const checkOutDate = booking.CheckOutDate ? new Date(booking.CheckOutDate) : null;
+
+            if (booking.amount){
+                totalAmount += booking.amount
+            }
 
             return {
                 ...booking._doc, // Spread original document
@@ -169,7 +174,7 @@ exports.getAllBookings = async (req, res) => {
                 CheckOutDate: checkOutDate ? checkOutDate.toDateString() : null,
             };
         });
-        return res.status(200).json( formattedBookings )
+        return res.status(200).json({ formattedBookings, totalAmount })
     } catch (error) {
         console.log({ message: error.message })
         return res.status(500).json({ message: "Internal Server Error" });
