@@ -180,3 +180,31 @@ exports.getAllBookings = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+exports.getUserBookings = async (req, res) => {
+    const { email } = req.body;
+
+    try{
+        const userBookings = await Booking.find({ email })
+        if (!userBookings ) {
+            return res.status(404).json({ message: "No bookings found for this user." });
+        }
+
+        const formattedBookings = userBookings.map((booking) => {
+            const checkInDate = booking.CheckInDate ? new Date(booking.CheckInDate).toDateString() : null;
+            const checkOutDate = booking.CheckOutDate ? new Date(booking.CheckOutDate).toDateString() : null;
+            const createdAt = booking.createdAt ? new Date(booking.createdAt).toDateString() : null;
+
+            return {
+                ...booking._doc,
+                CheckInDate: checkInDate,
+                CheckOutDate: checkOutDate,
+                createdAtDate: createdAt,
+            };
+        });
+        return res.status(200).json({ bookings: formattedBookings });
+    } catch (error) {
+        console.log({ message: error.message })
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}

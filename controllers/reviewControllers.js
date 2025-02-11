@@ -45,6 +45,10 @@ exports.getOneReview = async (req, res) => {
 exports.getAllReview = async (req, res) => {
     try {
       const reviews = await Review.find();
+
+      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+
+      const averageRating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(2) : 0;
   
       // Map through reviews and format date fields
       const formattedReviews = reviews.map((review) => {
@@ -54,12 +58,16 @@ exports.getAllReview = async (req, res) => {
         };
       });
   
-      res.status(200).json(formattedReviews); // Send formatted response
+      res.status(200).json({
+        reviews: formattedReviews,
+        averageRating: parseFloat(averageRating),  // Convert back to number
+        totalReviews: reviews.length
+      });
     } catch (error) {
       console.error({ message: error.message });
       res.status(500).json({ message: "Internal Server Error" });
     }
-  };
+};
   
 
 exports.updateOneReview = async (req, res) => {
