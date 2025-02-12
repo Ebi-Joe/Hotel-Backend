@@ -183,6 +183,10 @@ exports.getAllBookings = async (req, res) => {
 
 exports.getUserBookings = async (req, res) => {
     const { email } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ message: "Email is required to fetch bookings." });
+    }
 
     try{
         const userBookings = await Booking.find({ email })
