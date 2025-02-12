@@ -6,6 +6,6 @@ const router = express.Router()
 router.post("/api/booking", bookingControllers.newBooking)
 router.post("/api/payment/verify", bookingControllers.verifyPayments)
 router.get("/api/getAll-Bookings",bookingControllers.getAllBookings)
-router.get("/api/getUserBookings", bookingControllers.getUserBookings)
+router.post("/api/getUserBookings", bookingControllers.getUserBookings)
 
 module.exports = router
