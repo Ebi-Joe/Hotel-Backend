@@ -6,8 +6,14 @@ const userSchema = Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     email: Joi.string().email().required(),
-    password: Joi.string().pattern(new RegExp('^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,30}$')).required(),
-    confirmPassword: Joi.string().pattern(new RegExp('^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,30}$')).required(),
+    password: Joi.string()
+    .pattern(new RegExp('^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*.])[A-Za-z\\d!@#$%^&*.]{8,30}$'))
+    .required(),
+  
+  confirmPassword: Joi.string()
+    .pattern(new RegExp('^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*.])[A-Za-z\\d!@#$%^&*.]{8,30}$'))
+    .required(),
+  
     role: Joi.string().required(),
 });
 
