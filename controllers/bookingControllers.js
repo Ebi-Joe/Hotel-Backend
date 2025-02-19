@@ -9,7 +9,7 @@ dotenv.config();
 const FLW_SECRET_KEY = process.env.FLW_SECRET_KEY;
 
 exports.newBooking = async (req, res) => {
-    const { firstName, lastName, phone, email, currency, roomType, roomName, rooms, CheckInDate, CheckOutDate, amount, totalDays } = req.body;
+    const { firstName, lastName, phone, email, currency, roomType, roomName, rooms, CheckInDate, CheckInTime, CheckOutDate, CheckOutTime, amount, totalDays } = req.body;
 
     const availableRooms = await Room.find({ roomType, isAvailable: true }).limit(rooms);
 
@@ -38,7 +38,9 @@ exports.newBooking = async (req, res) => {
                 roomName,
                 rooms,
                 CheckInDate,
+                CheckInTime,
                 CheckOutDate,
+                CheckOutTime,
                 totalDays,
             },
             customizations: {
@@ -91,7 +93,9 @@ exports.verifyPayments = async (req, res) => {
                 roomName: data.data.meta.roomName,
                 rooms: data.data.meta.rooms,
                 CheckInDate: data.data.meta.CheckInDate,
+                CheckInTime: data.data.meta.CheckInTime,
                 CheckOutDate: data.data.meta.CheckOutDate,
+                CheckOutTime: data.data.meta.CheckOutTime,
                 totalDays: data.data.meta.totalDays,
                 amount: data.data.amount,
                 status: "complete"
